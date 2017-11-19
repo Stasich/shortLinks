@@ -1,4 +1,5 @@
 <?php
+
 class ShortLink
 {
     private static $shortLinkObj = null;
@@ -6,10 +7,17 @@ class ShortLink
 
     private function __construct($username, $password, $dbname, $charset)
     {
-        self::$pdo = new PDO('mysql:host=localhost;dbname='.$dbname.';charset='.$charset, $username, $password);
+        self::$pdo = new PDO('mysql:host=localhost;dbname=' . $dbname . ';charset=' . $charset, $username, $password);
     }
-    private function __clone() {}
-    private function __wakeup() {}
+
+    private function __clone()
+    {
+    }
+
+    private function __wakeup()
+    {
+    }
+
     // cтатик функция для создания или возвращения существующего объекта.
     public static function getObjLink($username, $password, $dbname, $charset)
     {
@@ -17,39 +25,40 @@ class ShortLink
             self::$shortLinkObj = new ShortLink($username, $password, $dbname, $charset);
         return self::$shortLinkObj;
     }
+
     // токен для session
     public function getToken()
     {
-        return hash('ripemd160', 'mytime'.time() );
+        return hash('ripemd160', 'mytime' . time());
     }
+
     // получаем сокращённую сылку
     public function getShortLink($longLink, $hash = '')
     {
-        $scheme = parse_url($longLink , PHP_URL_SCHEME);
+        $scheme = parse_url($longLink, PHP_URL_SCHEME);
         if (empty($scheme))
-            $longLink = 'http://'.$longLink;
+            $longLink = 'http://' . $longLink;
 
         $query = 'insert into links values (:hash,:link)';
         $stmt = self::$pdo->prepare($query);
 
         do {
             if ($hash == '')
-                $hash = substr(md5('time'.time()), 0, 6 );
-            else
-            {
+                $hash = substr(md5('time' . time()), 0, 6);
+            else {
                 if ($this->isHashInDB($hash))
                     return 'duplicate';
             }
             if ($this->isHashInDB($hash))
                 continue;
             $stmt->execute([
-               'hash' => $hash,
-               'link' => $longLink
+                'hash' => $hash,
+                'link' => $longLink
             ]);
             break;
         } while (true);
 
-        return 'http://'.$_SERVER['HTTP_HOST'].'/'.$hash;
+        return 'http://' . $_SERVER['HTTP_HOST'] . '/' . $hash;
     }
 
     // перходим по ссылке если есть соответствие в базе
@@ -70,14 +79,15 @@ class ShortLink
         if (!$sqlAnswer)
             return null;
         $link = $stmt->fetch()['link'];
-        header('Location: '. $link);
+        header('Location: ' . $link);
 
     }
+
     private function isHashInDB($hash)
     {
         $query = 'select hash from links where hash = :hash';
         $stmt = self::$pdo->prepare($query);
-        $stmt->execute(['hash'=> $hash]);
+        $stmt->execute(['hash' => $hash]);
         $result = $stmt->fetch();
         if (!empty($result))
             return true;
