@@ -55,6 +55,7 @@ class ShortLink
     // перходим по ссылке если есть соответствие в базе
     public function goToLink($uri)
     {
+        $uri = urldecode($uri);
         $uriArr = explode('/', $uri);
 
         if (empty($uriArr[1]))
