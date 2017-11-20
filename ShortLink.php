@@ -93,4 +93,9 @@ class ShortLink
             return true;
         return false;
     }
+
+    public function Ajax($shortLink, $token)
+    {
+        echo json_encode(['shortLink' => $shortLink, 'token' => $token]);
+    }
 }

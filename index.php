@@ -6,7 +6,8 @@ session_start();
 //создём обект для работы с сылками и сразу подключаемся к базе
 $objLink = ShortLink::getObjLink($username, $password, $dbname, $charset);
 //передаём URI  в объект, если всё ок, то произойдёт переход.
-$redirect = $objLink->goToLink($_SERVER['REQUEST_URI']);
+if (!isset($_GET['ajax']))
+    $redirect = $objLink->goToLink($_SERVER['REQUEST_URI']);
 
 //токен для защиты от csrf
 $token = $objLink->getToken();
@@ -21,6 +22,11 @@ if (isset($_POST['link']) && isset($_POST['token'])) {
         }
 }
 $_SESSION['token'] = $token;
+if (isset($_GET['ajax'])){
+    $objLink->Ajax($shortLink, $token);
+    die;
+}
+
 if ($redirect === null)
     echo "Нет соответсвия с короткой ссылкой. Попробуйт создать ещё раз.<br>\n";
 require_once 'view/head.php';
